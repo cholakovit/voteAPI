@@ -20,41 +20,6 @@ export class PollsRepository {
     this.ttl = configService.get('POLL_DURATION');
   }
 
-  // async createPoll({
-  //   votesPerVoter,
-  //   topic,
-  //   pollID,
-  //   userID,
-  // }: CreatePollData): Promise<Poll> {
-  //   const initialPoll = {
-  //     id: pollID,
-  //     topic,
-  //     votesPerVoter,
-  //     participants: {},
-  //     adminID: userID,
-  //   };
-
-  //   this.logger.log(
-  //     `Creating new poll: ${JSON.stringify(initialPoll, null, 2)} with TTL: ${this.ttl}`,
-  //   );
-
-  //   const key = `polls:${pollID}`;
-
-  //   try {
-  //     await this.redisClient
-  //       .multi([
-  //         ['JSON.SET', key, '.', JSON.stringify(initialPoll)], // JSON.SET command in array format
-  //         ['expire', key, this.ttl], // expire command in array format
-  //       ])
-  //       .exec();
-
-  //     return initialPoll;
-  //   } catch (error) {
-  //     this.logger.error(`Error creating poll: ${error}`);
-  //     throw new InternalServerErrorException();
-  //   }
-  // }
-
   async createPoll({
     votesPerVoter,
     topic,
