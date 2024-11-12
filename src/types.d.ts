@@ -1,7 +1,15 @@
 import { FactoryProvider, ModuleMetadata } from '@nestjs/common';
 import Redis, { RedisOptions } from 'ioredis';
-
+import { Request } from '@nestjs/common';
 declare global {
+  type AuthPayload = {
+    userID: string;
+    pollID: string;
+    name: string;
+  };
+
+  type RequestWithAuth = Request & AuthPayload;
+
   type RejoinPollFields = {
     pollID: string;
     userID: string;
