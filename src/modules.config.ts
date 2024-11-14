@@ -30,8 +30,7 @@ export const redisModule = RedisModule.registerAsync({
   },
   inject: [ConfigService],
 });
-
-export const jwpModule = JwtModule.registerAsync({
+export const jwtModule = JwtModule.registerAsync({
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => ({
     secret: configService.get<string>('JWT_SECRET'),

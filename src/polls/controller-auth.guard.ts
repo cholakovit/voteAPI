@@ -14,14 +14,14 @@ export class ControllerAuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    this.logger.debug(`Check for auth token on request body ${request.body}`);
+    this.logger.debug(`Check for auth token on request body: ${request.body}`);
 
     const { accessToken } = request.body;
 
     try {
       const payload = this.jwtService.verify(accessToken);
 
-      request.userID = payload.sub;
+      request.userID = payload.userID;
       request.pollID = payload.pollID;
       request.name = payload.name;
     } catch {

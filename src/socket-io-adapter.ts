@@ -1,33 +1,30 @@
-import { INestApplicationContext, Logger } from '@nestjs/common';
+import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ServerOptions } from 'socket.io';
 
 export class SocketIOAdapter extends IoAdapter {
   private readonly logger = new Logger(SocketIOAdapter.name);
   constructor(
-    private app: INestApplicationContext,
+    private app: INestApplication,
     private configService: ConfigService,
   ) {
     super(app);
   }
 
-  createIOServer(port: number, options?: ServerOptions) {
+  createIOServer(port: number, options?: any) {
     //const clientPort = parseInt(this.configService.get('CLIENT_PORT'));
 
     const cors = {
       origin: '*',
     };
 
-    this.logger.log(`Creating Socket.IO server on port ${port}`, {
-      cors,
-    });
+    this.logger.log(`Creating SocketIO server on port ${port}`, { cors });
 
-    const optionsWithCORS: ServerOptions = {
+    const optionsWithCors = {
       ...options,
       cors,
     };
 
-    return super.createIOServer(port, optionsWithCORS);
+    return super.createIOServer(port, optionsWithCors);
   }
 }
