@@ -13,7 +13,7 @@ export class ControllerAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request: RequestWithAuth = context.switchToHttp().getRequest();
     this.logger.debug(`Check for auth token on request body: ${request.body}`);
 
     const { accessToken } = request.body;

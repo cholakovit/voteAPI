@@ -31,6 +31,7 @@ export class PollsService {
       },
       {
         subject: userID,
+        expiresIn: '1h', // Set token expiration to 1 hour
       },
     );
 
@@ -60,6 +61,7 @@ export class PollsService {
       },
       {
         subject: userID,
+        expiresIn: '1h', // Set token expiration to 1 hour
       },
     );
 
