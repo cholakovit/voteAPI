@@ -1,14 +1,19 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { PollsService } from './polls.service';
 import { Namespace } from 'socket.io';
+import { WsBadRequestException } from 'src/exceptions/ws-exceptions';
+import { WsFilter } from 'src/exceptions/ws-filter';
 
+@UsePipes(new ValidationPipe())
+@UseFilters(new WsFilter())
 @WebSocketGateway({
   namespace: 'polls',
   cors: {
@@ -49,5 +54,10 @@ export class PollsGetaway
 
     this.logger.log(`Disconnected socket id: ${client.id}`);
     this.logger.debug(`Number of connected sockeets: ${sockets.size}`);
+  }
+
+  @SubscribeMessage('test')
+  async test() {
+    throw new WsBadRequestException('Invalid empty data: ');
   }
 }

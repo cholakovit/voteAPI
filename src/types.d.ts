@@ -4,6 +4,8 @@ import Redis, { RedisOptions } from 'ioredis';
 import { Request } from 'express';
 import { Socket } from 'socket.io';
 declare global {
+  type WsExceptionType = 'BadRequest' | 'Unauthorized' | 'Unknown';
+
   type AuthPayload = {
     userID: string;
     pollID: string;
