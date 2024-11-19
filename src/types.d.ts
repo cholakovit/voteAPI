@@ -38,6 +38,12 @@ declare global {
     name: string;
   };
 
+  type AddParticipantFields = {
+    pollID: string;
+    userID: string;
+    name: string;
+  };
+
   type CreatePollData = {
     pollID: string;
     topic: string;
@@ -73,5 +79,6 @@ declare global {
     votesPerVoter: number;
     participants: Participants;
     adminID: string;
+    hasStarted: boolean;
   };
 }
