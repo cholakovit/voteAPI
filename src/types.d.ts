@@ -73,6 +73,53 @@ declare global {
     [participantID: string]: string;
   };
 
+  type AddNominationData = {
+    pollID: string;
+    nominationID: string;
+    nomination: Nomination;
+  };
+
+  type AddNominationFields = {
+    pollID: string;
+    userID: string;
+    text: string;
+  };
+
+  type Nomination = {
+    userID: string;
+    text: string;
+  };
+
+  // type Nominations = {
+  //   [nominationID: string]: Nomination;
+  // };
+
+  type Nominations = {
+    [nominationID: NominationID]: Nomination;
+  };
+
+  type Rankings = {
+    [userID: string]: number;
+  };
+
+  type AddParticipandRankingData = {
+    pollID: string;
+    userID: string;
+    rankings: string[];
+  };
+
+  type SubmitRankingsFields = {
+    pollID: string;
+    userID: string;
+    rankings: string[];
+  };
+
+  type Results = Array<{
+    nominationID: NominationID;
+    nominationText: string;
+    score: number;
+  }>;
+
   type Poll = {
     id: string;
     topic: string;
@@ -80,5 +127,8 @@ declare global {
     participants: Participants;
     adminID: string;
     hasStarted: boolean;
+    nominations: Nominations;
+    rankings: Rankings;
+    results: Results;
   };
 }

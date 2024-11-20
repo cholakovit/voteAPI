@@ -20,6 +20,7 @@ import { Namespace } from 'socket.io';
 import { WsBadRequestException } from 'src/exceptions/ws-exceptions';
 import { WsFilter } from 'src/exceptions/ws-filter';
 import { GetawayAdminGuard } from './getaway-admin.guard';
+import { NominationDto } from './dtos';
 
 @UsePipes(new ValidationPipe())
 @UseFilters(new WsFilter())
@@ -111,5 +112,73 @@ export class PollsGetaway
     if (updatedPoll) {
       this.io.to(client.pollID).emit('update_poll', updatedPoll);
     }
+  }
+
+  @SubscribeMessage('nominate')
+  async nominate(
+    @MessageBody() nomination: NominationDto,
+    @ConnectedSocket() client: SocketWithAuth,
+  ): Promise<Poll> {
+    this.logger.debug(
+      `Attempting to nominate with userID/text: ${nomination.userID}/${nomination.text} to pollID: ${client.pollID}`,
+    );
+
+    const updatedPoll = await this.pollsService.addNomination({
+      pollID: client.pollID,
+      userID: nomination.userID,
+      text: nomination.text,
+    });
+
+    if (updatedPoll) {
+      this.io.to(client.pollID).emit('update_poll', updatedPoll);
+    }
+
+    return updatedPoll;
+  }
+
+  @UseGuards(GetawayAdminGuard)
+  @SubscribeMessage('remove_nomination')
+  async removeNomination(
+    @MessageBody('id') nominationID: string,
+    @ConnectedSocket() client: SocketWithAuth,
+  ): Promise<void> {
+    this.logger.debug(
+      `Attempting to remove nomination with nominationID: ${nominationID} from pollID: ${client.pollID}`,
+    );
+
+    const updatedPoll = await this.pollsService.removeNomination(
+      client.pollID,
+      nominationID,
+    );
+
+    this.io.to(client.pollID).emit('poll_updated', updatedPoll);
+  }
+
+  @UseGuards(GetawayAdminGuard)
+  @SubscribeMessage('start_vote')
+  async startVote(@ConnectedSocket() client: SocketWithAuth): Promise<void> {
+    this.logger.debug(`Attempting to start vote for pollID: ${client.pollID}`);
+
+    const updatedPoll = await this.pollsService.startPoll(client.pollID);
+
+    this.io.to(client.pollID).emit('poll_updated', updatedPoll);
+  }
+
+  @UseGuards(GetawayAdminGuard)
+  @SubscribeMessage('close_poll')
+  async closePoll(@ConnectedSocket() client: SocketWithAuth): Promise<void> {
+    this.logger.debug(`Closing poll: ${client.pollID} and computing results`);
+
+    const updatedPoll = await this.pollsService.computeResults(client.pollID);
+
+    this.io.to(client.pollID).emit('poll_updated', updatedPoll);
+  }
+
+  async cancelPoll(@ConnectedSocket() client: SocketWithAuth): Promise<void> {
+    this.logger.debug(`Cancelling poll: ${client.pollID}`);
+
+    await this.pollsService.cancelPoll(client.pollID);
+
+    this.io.to(client.pollID).emit('poll_cancelled');
   }
 }
