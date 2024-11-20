@@ -107,27 +107,39 @@ export class PollsRepository {
       `Attempting to add a participant with userID/name: ${userID}/${name} to pollID: ${pollID}`,
     );
 
-    const key = `polls: ${pollID}`;
-    const participantPath = `.participants.${userID}`;
+    const key = `polls:${pollID}`;
+    const participantsPath = `.participants`;
 
     try {
+      // Ensure the base structure of the poll exists
+      const pollExists = await this.redisClient.sendCommand(
+        new Command('JSON.GET', [key]),
+      );
+
+      if (!pollExists) {
+        this.logger.error(`Poll with ID: ${pollID} does not exist in Redis.`);
+        throw new Error(`Poll with ID: ${pollID} does not exist.`);
+      }
+
+      // Ensure the `participants` path exists
+      const participants = await this.redisClient.sendCommand(
+        new Command('JSON.GET', [key, participantsPath]),
+      );
+
+      if (!participants) {
+        // If `participants` doesn't exist, create it as an empty object
+        await this.redisClient.sendCommand(
+          new Command('JSON.SET', [key, participantsPath, '{}']),
+        );
+      }
+
+      // Add the new participant
+      const participantPath = `.participants.${userID}`;
       await this.redisClient.sendCommand(
         new Command('JSON.SET', [key, participantPath, JSON.stringify(name)]),
       );
 
-      // const pollJSON = await this.redisClient.sendCommand(
-      //   new Command('JSON.GET', [key, '.']),
-      // );
-
-      // const poll = JSON.parse(pollJSON as string) as Poll;
-
-      // this.logger.debug(
-      //   `Current Participants for pollID: ${pollID}`,
-      //   poll.participants,
-      // );
-
-      //return poll;
-      return this.getPoll(pollID);
+      return this.getPoll(pollID); // Fetch and return the updated poll
     } catch (e) {
       this.logger.error(
         `Failed to add participant with userID/name: ${userID}/${name} to pollID: ${pollID}`,

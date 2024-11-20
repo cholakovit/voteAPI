@@ -28,6 +28,12 @@ export class PollsController {
     return result;
   }
 
+  // @Post('/join')
+  // async join(@Req() request: Request) {
+  //   console.log('Endpoint hit'); // Confirm the endpoint is reached
+  //   console.log('Request Body:', request.body); // Log the request body
+  // }
+
   @UseGuards(ControllerAuthGuard)
   @Post('/rejoin')
   async rejoin(@Req() request: RequestWithAuth) {
