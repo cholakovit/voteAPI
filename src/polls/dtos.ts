@@ -27,10 +27,6 @@ export class JoinPollDto {
 
 export class NominationDto {
   @IsString()
-  @Length(6, 6)
-  userID: string;
-
-  @IsString()
   @Length(1, 75)
   text: string;
 }

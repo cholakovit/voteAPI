@@ -115,25 +115,22 @@ export class PollsGetaway
   }
 
   @SubscribeMessage('nominate')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async nominate(
     @MessageBody() nomination: NominationDto,
     @ConnectedSocket() client: SocketWithAuth,
-  ): Promise<Poll> {
+  ): Promise<void> {
     this.logger.debug(
-      `Attempting to nominate with userID/text: ${nomination.userID}/${nomination.text} to pollID: ${client.pollID}`,
+      `Attempting to nominate with userID/text: ${client.userID}/${nomination.text} to pollID: ${client.pollID}`,
     );
 
     const updatedPoll = await this.pollsService.addNomination({
       pollID: client.pollID,
-      userID: nomination.userID,
+      userID: client.userID,
       text: nomination.text,
     });
 
-    if (updatedPoll) {
-      this.io.to(client.pollID).emit('update_poll', updatedPoll);
-    }
-
-    return updatedPoll;
+    this.io.to(client.pollID).emit('update_poll', updatedPoll);
   }
 
   @UseGuards(GetawayAdminGuard)

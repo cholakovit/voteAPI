@@ -11,10 +11,12 @@ import { WsUnauthorizedException } from 'src/exceptions/ws-exceptions';
 @Injectable()
 export class GetawayAdminGuard implements CanActivate {
   private readonly logger = new Logger(GetawayAdminGuard.name);
+
   constructor(
     private readonly pollsService: PollsService,
     private readonly jwtService: JwtService,
   ) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const socket: SocketWithAuth = context.switchToWs().getClient();
 
@@ -42,7 +44,7 @@ export class GetawayAdminGuard implements CanActivate {
 
       return true;
     } catch {
-      throw new WsUnauthorizedException('Unsufficient permissions');
+      throw new WsUnauthorizedException('Unsufficient privileges');
     }
   }
 }

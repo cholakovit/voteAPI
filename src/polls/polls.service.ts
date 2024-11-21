@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { createPollID, createUserID, createNominationID } from 'src/utils/ids';
 import { PollsRepository } from './polls.repository';
 import { SubscribeMessage } from '@nestjs/websockets';
+import getResults from './getResults';
 
 @Injectable()
 export class PollsService {
