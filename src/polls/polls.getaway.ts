@@ -21,6 +21,7 @@ import { WsBadRequestException } from 'src/exceptions/ws-exceptions';
 import { WsFilter } from 'src/exceptions/ws-filter';
 import { GetawayAdminGuard } from './getaway-admin.guard';
 import { NominationDto } from './dtos';
+import { validate } from 'class-validator';
 
 @UsePipes(new ValidationPipe())
 @UseFilters(new WsFilter())
@@ -115,13 +116,30 @@ export class PollsGetaway
   }
 
   @SubscribeMessage('nominate')
-  @UsePipes(new ValidationPipe({ transform: true }))
   async nominate(
-    @MessageBody() nomination: NominationDto,
+    @MessageBody() rawPayload: any,
     @ConnectedSocket() client: SocketWithAuth,
   ): Promise<void> {
-    this.logger.debug(
-      `Attempting to nominate with userID/text: ${client.userID}/${nomination.text} to pollID: ${client.pollID}`,
+    let parsedPayload: any;
+    try {
+      parsedPayload =
+        typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+    } catch {
+      console.error('Invalid JSON payload: ', rawPayload);
+      throw new Error('Invalid payload');
+    }
+
+    const nomination = new NominationDto();
+    nomination.text = parsedPayload.text;
+
+    const error = await validate(nomination, { skipMissingProperties: false });
+    if (error.length > 0) {
+      console.error('Validation error:', error);
+      throw new Error('Invalid payload');
+    }
+
+    console.debug(
+      `Attempting to add nomination for user ${client.userID} to poll ${client.pollID}\n${nomination.text}`,
     );
 
     const updatedPoll = await this.pollsService.addNomination({

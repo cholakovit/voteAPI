@@ -26,7 +26,7 @@ export class JoinPollDto {
 }
 
 export class NominationDto {
-  @IsString()
-  @Length(1, 75)
+  @IsString({ message: 'Text must be a string' })
+  @Length(1, 100, { message: 'Text must be between 1 and 100 characters' })
   text: string;
 }
