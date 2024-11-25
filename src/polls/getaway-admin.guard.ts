@@ -32,13 +32,17 @@ export class GetawayAdminGuard implements CanActivate {
       const payload = this.jwtService.verify<AuthPayload & { sub: string }>(
         token,
       );
+
+      const decoded = this.jwtService.decode(token);
+      this.logger.debug(`Decoded token payload: ${JSON.stringify(decoded)}`);
+
       this.logger.debug(`Validating admin using token payload: ${payload}`);
 
-      const { userID, pollID } = payload;
+      const { sub, pollID } = payload;
 
       const poll = await this.pollsService.getPoll(pollID);
 
-      if (userID !== poll.adminID) {
+      if (sub !== poll.adminID) {
         throw new WsUnauthorizedException('Invalid token');
       }
 

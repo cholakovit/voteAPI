@@ -90,10 +90,6 @@ declare global {
     text: string;
   };
 
-  // type Nominations = {
-  //   [nominationID: string]: Nomination;
-  // };
-
   type Nominations = {
     [nominationID: NominationID]: Nomination;
   };

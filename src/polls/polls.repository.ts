@@ -91,6 +91,11 @@ export class PollsRepository {
 
       this.logger.verbose(currentPoll);
 
+      const parsedPoll = JSON.parse(currentPoll);
+      this.logger.debug(
+        `Parsed poll object: ${JSON.stringify(parsedPoll, null, 2)}`,
+      );
+
       return JSON.parse(currentPoll);
     } catch (e) {
       this.logger.error(`Failed to get pollID ${pollID}`);
