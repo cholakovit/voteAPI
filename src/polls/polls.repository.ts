@@ -116,7 +116,6 @@ export class PollsRepository {
     const participantsPath = `.participants`;
 
     try {
-      // Ensure the base structure of the poll exists
       const pollExists = await this.redisClient.sendCommand(
         new Command('JSON.GET', [key]),
       );
@@ -126,25 +125,22 @@ export class PollsRepository {
         throw new Error(`Poll with ID: ${pollID} does not exist.`);
       }
 
-      // Ensure the `participants` path exists
       const participants = await this.redisClient.sendCommand(
         new Command('JSON.GET', [key, participantsPath]),
       );
 
       if (!participants) {
-        // If `participants` doesn't exist, create it as an empty object
         await this.redisClient.sendCommand(
           new Command('JSON.SET', [key, participantsPath, '{}']),
         );
       }
 
-      // Add the new participant
       const participantPath = `.participants.${userID}`;
       await this.redisClient.sendCommand(
         new Command('JSON.SET', [key, participantPath, JSON.stringify(name)]),
       );
 
-      return this.getPoll(pollID); // Fetch and return the updated poll
+      return this.getPoll(pollID);
     } catch (e) {
       this.logger.error(
         `Failed to add participant with userID/name: ${userID}/${name} to pollID: ${pollID}`,

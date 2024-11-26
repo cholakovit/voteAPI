@@ -179,6 +179,23 @@ export class PollsGetaway
     this.io.to(client.pollID).emit('poll_updated', updatedPoll);
   }
 
+  @SubscribeMessage('submit_rankings')
+  async submitRankings(
+    @ConnectedSocket() client: SocketWithAuth,
+    @MessageBody('rankings') rankings: string[],
+  ): Promise<void> {
+    this.logger.debug(
+      `Attempting to submit rankings for pollID: ${client.pollID}`,
+    );
+    const updatedPoll = await this.pollsService.submitRankings({
+      pollID: client.pollID,
+      userID: client.userID,
+      rankings,
+    });
+
+    this.io.to(client.pollID).emit('poll_updated', updatedPoll);
+  }
+
   @UseGuards(GetawayAdminGuard)
   @SubscribeMessage('close_poll')
   async closePoll(@ConnectedSocket() client: SocketWithAuth): Promise<void> {
