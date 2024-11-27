@@ -131,7 +131,22 @@ export class PollsService {
 
   @SubscribeMessage('submit_rankings')
   async submitRankings(rankingsData: SubmitRankingsFields): Promise<Poll> {
-    const hasPollStarted = this.pollsRepository.getPoll(rankingsData.pollID);
+    this.logger.debug(
+      `Checking poll existence for pollID: ${rankingsData.pollID}`,
+    );
+    const hasPollStarted = await this.pollsRepository.getPoll(
+      rankingsData.pollID,
+    );
+    if (!hasPollStarted) {
+      this.logger.warn(
+        `Poll does not exist or hasn't started for pollID: ${rankingsData.pollID}`,
+      );
+      throw new BadRequestException(
+        'Participants cannot rank until the poll has started.',
+      );
+    }
+
+    //const hasPollStarted = this.pollsRepository.getPoll(rankingsData.pollID);
 
     if (!hasPollStarted) {
       throw new BadRequestException(

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Logger,
   UseFilters,
   UseGuards,
@@ -182,11 +183,35 @@ export class PollsGetaway
   @SubscribeMessage('submit_rankings')
   async submitRankings(
     @ConnectedSocket() client: SocketWithAuth,
-    @MessageBody('rankings') rankings: string[],
+    @MessageBody() rawPayload: any, // Raw payload as string
   ): Promise<void> {
+    // Parse the payload
+    const payload =
+      typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+
+    this.logger.debug(`Parsed payload: ${JSON.stringify(payload)}`);
+
+    // Extract rankings from payload
+    const rankings = payload.data?.rankings;
+
+    if (!rankings || rankings.length === 0) {
+      this.logger.error('Rankings are undefined or empty.');
+      throw new BadRequestException('Rankings cannot be empty.');
+    }
+
     this.logger.debug(
       `Attempting to submit rankings for pollID: ${client.pollID}`,
     );
+
+    const poll = await this.pollsService.getPoll(client.pollID);
+
+    if (!poll.hasStarted) {
+      this.logger.warn(`Poll with ID ${client.pollID} has not started yet.`);
+      throw new BadRequestException(
+        'Participants cannot rank until the poll has started.',
+      );
+    }
+
     const updatedPoll = await this.pollsService.submitRankings({
       pollID: client.pollID,
       userID: client.userID,

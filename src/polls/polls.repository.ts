@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis, { Command } from 'ioredis';
@@ -233,9 +234,13 @@ export class PollsRepository {
     rankings,
   }: AddParticipandRankingData): Promise<Poll> {
     this.logger.log(
-      `Attempting to add rankings for userID/name: ${userID} to pollID: ${pollID}`,
-      rankings,
+      `Attempting to add rankings for userID: ${userID} to pollID: ${pollID}`,
     );
+
+    if (!rankings || rankings.length === 0) {
+      this.logger.error('Rankings data is undefined or empty.');
+      throw new BadRequestException('Rankings cannot be empty.');
+    }
 
     const key = `polls:${pollID}`;
     const participantPath = `.rankings.${userID}`;
@@ -250,13 +255,12 @@ export class PollsRepository {
       );
 
       return this.getPoll(pollID);
-    } catch {
+    } catch (error) {
       this.logger.error(
-        `Failed to add a rankings for userID/name: ${userID}/ to pollID: ${pollID}`,
-        rankings,
+        `Failed to add rankings for userID: ${userID} to pollID: ${pollID} - Error: ${error.message}`,
       );
       throw new InternalServerErrorException(
-        'There was an error starting the poll',
+        'There was an error saving the rankings',
       );
     }
   }
