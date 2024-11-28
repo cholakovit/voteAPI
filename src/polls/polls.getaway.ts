@@ -192,7 +192,7 @@ export class PollsGetaway
     this.logger.debug(`Parsed payload: ${JSON.stringify(payload)}`);
 
     // Extract rankings from payload
-    const rankings = payload.data?.rankings;
+    const rankings = payload.rankings; // Access rankings directly at the root
 
     if (!rankings || rankings.length === 0) {
       this.logger.error('Rankings are undefined or empty.');
@@ -203,14 +203,14 @@ export class PollsGetaway
       `Attempting to submit rankings for pollID: ${client.pollID}`,
     );
 
-    const poll = await this.pollsService.getPoll(client.pollID);
+    //const poll = await this.pollsService.getPoll(client.pollID);
 
-    if (!poll.hasStarted) {
-      this.logger.warn(`Poll with ID ${client.pollID} has not started yet.`);
-      throw new BadRequestException(
-        'Participants cannot rank until the poll has started.',
-      );
-    }
+    // if (!poll.hasStarted) {
+    //   this.logger.warn(`Poll with ID ${client.pollID} has not started yet.`);
+    //   throw new BadRequestException(
+    //     'Participants cannot rank until the poll has started.',
+    //   );
+    // }
 
     const updatedPoll = await this.pollsService.submitRankings({
       pollID: client.pollID,
