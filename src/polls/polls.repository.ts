@@ -271,7 +271,7 @@ export class PollsRepository {
       JSON.stringify(results),
     );
 
-    const key = `polls${pollID}`;
+    const key = `polls:${pollID}`;
     const resultsPath = `.results`;
 
     try {
